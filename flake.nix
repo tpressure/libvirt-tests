@@ -7,13 +7,15 @@
     # A local path can be used for developing or testing local changes. Make
     # sure the submodules in a local libvirt checkout are populated.
     libvirt-src = {
-      # url = "git+file:<path/to/libvirt>?submodules=1";
+      #  url = "git+file:/home/tprescher/libvirt?submodules=1";
       url = "git+https://github.com/cyberus-technology/libvirt?ref=gardenlinux&submodules=1";
       flake = false;
     };
     cloud-hypervisor-src = {
-      # url = "git+file::<path/to/cloud-hypervisor>";
+      #  url = "git+file:/home/tprescher/cloud-hypervisor";
       url = "github:cyberus-technology/cloud-hypervisor?ref=gardenlinux";
+      # url = "github:phip1611/cloud-hypervisor?ref=cyberus-fork-poc-precopy-autoconverge";
+      #  url = "github:phip1611/cloud-hypervisor?ref=xxx-temp-test";
       flake = false;
     };
     # Nix tooling to build cloud-hypervisor.

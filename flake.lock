@@ -3,11 +3,11 @@
     "cloud-hypervisor-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1751300897,
-        "narHash": "sha256-DMTVGiNfVJH8YS+XdVd0ji1hO+zIzXrMxpKbvSdJHBY=",
+        "lastModified": 1755528295,
+        "narHash": "sha256-tq5L6wJCow6v0+iGfzt4fOmMhyo1nTPgSS4CYWz2ETk=",
         "owner": "cyberus-technology",
         "repo": "cloud-hypervisor",
-        "rev": "3b8b3a51f944fd0bbf58e8a76d8f8a83c046db04",
+        "rev": "dd53434cde0c5954d5ec117a95e86979ce76ce5f",
         "type": "github"
       },
       "original": {
@@ -53,11 +53,11 @@
     "libvirt-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1753875075,
-        "narHash": "sha256-qg0drCMT7Ue5dZRehkLWXt9/UTjOBD8e8W9EUuhZTwM=",
+        "lastModified": 1756114154,
+        "narHash": "sha256-A/E7OPhuHQCdaZgBcml3q2I/JDRlhEtTpLZ3NyAvA6c=",
         "ref": "gardenlinux",
-        "rev": "3dcada54e213de1b34ee5f4447fa53a93cc0c2f9",
-        "revCount": 52305,
+        "rev": "f4230a02ff6ac6af9a01926aa2569333a1adbf62",
+        "revCount": 52335,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/cyberus-technology/libvirt"

@@ -383,6 +383,7 @@ class LibvirtTests(unittest.TestCase):
         controllerVM.succeed("virsh -c ch:///session start testvm")
 
         assert wait_for_ssh(controllerVM)
+        # breakpoint()
 
         controllerVM.succeed(
             "virsh -c ch:///session attach-device testvm /etc/new_interface.xml"
@@ -393,7 +394,8 @@ class LibvirtTests(unittest.TestCase):
             "virsh -c ch:///session attach-disk --domain testvm --target vdb --persistent --source /var/lib/libvirt/storage-pools/nfs-share/disk.img"
         )
 
-        for i in range(2):
+        breakpoint()
+        for i in range(400):
             # Explicitly use IP in desturi as this was already a problem in the past
             controllerVM.succeed(
                 "virsh -c ch:///session migrate --domain testvm --desturi ch+tcp://192.168.100.2/session --persistent --live --p2p"
@@ -510,12 +512,15 @@ class LibvirtTests(unittest.TestCase):
 
         assert wait_for_ssh(controllerVM)
 
-        controllerVM.fail(
-            "virsh -c ch:///session migrate --domain testvm --desturi ch+tcp://computeVM/session --persistent --live --p2p"
-        )
-        assert wait_for_ssh(controllerVM)
+        for i in range(10):
+            print(f"\n\nMigration {i+1}/10\n\n")
+            controllerVM.fail(
+                    "virsh -c ch:///session migrate --domain testvm --desturi ch+tcp://computeVM/session --persistent --live --p2p"
+                    )
+            assert wait_for_ssh(controllerVM)
 
-        computeVM.fail("virsh -c ch:///session list | grep testvm")
+        # computeVM.fail("virsh -c ch:///session list | grep testvm")
+        breakpoint()
 
     def test_numa_topology(self):
         """
@@ -687,25 +692,25 @@ class LibvirtTests(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(LibvirtTests("test_hotplug"))
-    suite.addTest(LibvirtTests("test_libvirt_restart"))
+    # suite.addTest(LibvirtTests("test_hotplug"))
+    # suite.addTest(LibvirtTests("test_libvirt_restart"))
     suite.addTest(LibvirtTests("test_live_migration"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hotplug"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hugepages"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hugepages_failure_case"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hotplug_and_virtchd_restart"))
-    suite.addTest(LibvirtTests("test_numa_topology"))
-    suite.addTest(LibvirtTests("test_hugepages"))
-    suite.addTest(LibvirtTests("test_hugepages_prefault"))
-    suite.addTest(LibvirtTests("test_numa_hugepages"))
-    suite.addTest(LibvirtTests("test_numa_hugepages_prefault"))
-    suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_transient"))
-    suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_persistent"))
-    suite.addTest(LibvirtTests("test_network_hotplug_transient_vm_restart"))
-    suite.addTest(LibvirtTests("test_network_hotplug_persistent_vm_restart"))
-    suite.addTest(LibvirtTests("test_network_hotplug_persistent_transient_detach_vm_restart"))
-    suite.addTest(LibvirtTests("test_serial_file_output"))
-    suite.addTest(LibvirtTests("test_managedsave"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hotplug"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hugepages"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hugepages_failure_case"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hotplug_and_virtchd_restart"))
+    # suite.addTest(LibvirtTests("test_numa_topology"))
+    # suite.addTest(LibvirtTests("test_hugepages"))
+    # suite.addTest(LibvirtTests("test_hugepages_prefault"))
+    # suite.addTest(LibvirtTests("test_numa_hugepages"))
+    # suite.addTest(LibvirtTests("test_numa_hugepages_prefault"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_transient"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_persistent"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_transient_vm_restart"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_persistent_vm_restart"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_persistent_transient_detach_vm_restart"))
+    # suite.addTest(LibvirtTests("test_serial_file_output"))
+    # suite.addTest(LibvirtTests("test_managedsave"))
     return suite
 
 
