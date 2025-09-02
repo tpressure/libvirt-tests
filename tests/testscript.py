@@ -36,8 +36,8 @@ class LibvirtTests(unittest.TestCase):
         controllerVM.succeed("mkdir -p /var/lib/libvirt/storage-pools/nfs-share")
         computeVM.succeed("mkdir -p /var/lib/libvirt/storage-pools/nfs-share")
 
-        controllerVM.succeed("ssh -o StrictHostKeyChecking=no computeVM echo")
-        computeVM.succeed("ssh -o StrictHostKeyChecking=no controllerVM echo")
+        # controllerVM.succeed("ssh -o StrictHostKeyChecking=no computeVM echo")
+        # computeVM.succeed("ssh -o StrictHostKeyChecking=no controllerVM echo")
 
         controllerVM.succeed(
             'virsh pool-define-as --name "nfs-share" --type netfs --source-host "localhost" --source-path "nfs-root" --source-format "nfs" --target "/var/lib/libvirt/storage-pools/nfs-share"'
@@ -808,6 +808,7 @@ class LibvirtTests(unittest.TestCase):
         proper migration of those devices.
         """
 
+        breakpoint()
         controllerVM.succeed("virsh -c ch:///session define /etc/domain-chv.xml")
         controllerVM.succeed("virsh -c ch:///session start testvm")
 
@@ -829,7 +830,7 @@ class LibvirtTests(unittest.TestCase):
             print(f"Run {i+1}/1000")
             # Explicitly use IP in desturi as this was already a problem in the past
             controllerVM.succeed(
-                "virsh -c ch:///session migrate --domain testvm --desturi ch+tcp://192.168.100.2/session --persistent --live --p2p"
+                "virsh -c ch:///session migrate --domain testvm --desturi ch+tcp://computeVM/session --persistent --live --p2p"
             )
             assert wait_for_ssh(computeVM)
             computeVM.succeed(

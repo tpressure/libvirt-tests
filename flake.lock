@@ -3,16 +3,18 @@
     "cloud-hypervisor-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1756813704,
-        "narHash": "sha256-8564XdWvuOOD8afAnAMSBv0GuwAP6npw5mLcoPvz640=",
-        "rev": "d577426c623d561400002e4288565c9f57ad9eab",
-        "revCount": 8799,
-        "type": "git",
-        "url": "file:/home/tprescher/cloud-hypervisor"
+        "lastModified": 1756815265,
+        "narHash": "sha256-uTudUBCL4e/8zsoe3ptNRAfCmkiLHSQ4u4gR+LzYprU=",
+        "owner": "tpressure",
+        "repo": "cloud-hypervisor",
+        "rev": "5addce6069f7ea1fa9eb84d64fd3f0e0d94a13a8",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:/home/tprescher/cloud-hypervisor"
+        "owner": "tpressure",
+        "ref": "cyberus-fork-poc-precopy-autoconverge",
+        "repo": "cloud-hypervisor",
+        "type": "github"
       }
     },
     "crane": {

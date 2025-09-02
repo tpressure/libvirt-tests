@@ -36,10 +36,16 @@ pkgs.nixosTest {
           # Make Libvirt's TCP socket reachable from Host or the test script
           { from = "host"; host.port = 2223; guest.port = 16509; }
         ];
+
+        qemu.options = [
+          # Use TAP instead of VDE for eth2
+          "-netdev tap,id=tap2,ifname=tap2,script=no,downscript=no"
+          "-device virtio-net-pci,netdev=tap2,mac=52:54:00:12:01:11,mq=on,vectors=9"
+        ];
       };
 
       networking.extraHosts = ''
-        192.168.100.2 computeVM computeVM.local
+        192.168.111.2 computeVM computeVM.local
       '';
 
       systemd.network = {
@@ -74,7 +80,7 @@ pkgs.nixosTest {
       ];
 
       networking.extraHosts = ''
-        192.168.100.1 controllerVM controllerVM.local
+        192.168.111.1 controllerVM controllerVM.local
       '';
 
       virtualisation = {
@@ -89,6 +95,12 @@ pkgs.nixosTest {
         # Make the VM reachable from the Host or the test script via port 3333
         forwardPorts = [
           { from = "host"; host.port = 3333; guest.port = 22; }
+        ];
+
+        qemu.options = [
+          # Use TAP instead of VDE for eth2
+          "-netdev tap,id=tap3,ifname=tap3,script=no,downscript=no"
+          "-device virtio-net-pci,netdev=tap3,mac=52:54:00:12:01:22,mq=on,vectors=9"
         ];
       };
 
