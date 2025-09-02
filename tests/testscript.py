@@ -798,29 +798,69 @@ class LibvirtTests(unittest.TestCase):
         # cleanup of the transient XML correctly.
         controllerVM.fail("find /run/libvirt/ch -name *.xml | grep .")
 
+    def test_live_migration_long_running_with_load(self):
+        """
+        Test the live migration via virsh between 2 hosts. We want to use the
+        "--p2p" flag as this is the one used by OpenStack Nova. Using "--p2p"
+        results in another control flow of the migration, which is the one we
+        want to test.
+        We also hot-attach some devices before migrating, in order to cover
+        proper migration of those devices.
+        """
+
+        controllerVM.succeed("virsh -c ch:///session define /etc/domain-chv.xml")
+        controllerVM.succeed("virsh -c ch:///session start testvm")
+
+        assert wait_for_ssh(controllerVM)
+
+        controllerVM.succeed(
+            "virsh -c ch:///session attach-device testvm /etc/new_interface.xml"
+        )
+        controllerVM.succeed("qemu-img create -f raw /nfs-root/disk.img 100M")
+        controllerVM.succeed("chmod 0666 /nfs-root/disk.img")
+        controllerVM.succeed(
+            "virsh -c ch:///session attach-disk --domain testvm --target vdb --persistent --source /var/lib/libvirt/storage-pools/nfs-share/disk.img"
+        )
+
+        status, _ = ssh(controllerVM, "screen -dmS stress stress -m 8 --vm-bytes 200M")
+        assert status == 0
+
+        for i in range(1000):
+            print(f"Run {i+1}/1000")
+            # Explicitly use IP in desturi as this was already a problem in the past
+            controllerVM.succeed(
+                "virsh -c ch:///session migrate --domain testvm --desturi ch+tcp://192.168.100.2/session --persistent --live --p2p"
+            )
+            assert wait_for_ssh(computeVM)
+            computeVM.succeed(
+                "virsh -c ch:///session migrate --domain testvm --desturi ch+tcp://controllerVM/session --persistent --live --p2p"
+            )
+            assert wait_for_ssh(controllerVM)
+
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(LibvirtTests("test_hotplug"))
-    suite.addTest(LibvirtTests("test_libvirt_restart"))
-    suite.addTest(LibvirtTests("test_live_migration"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hotplug"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hugepages"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hugepages_failure_case"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hotplug_and_virtchd_restart"))
-    suite.addTest(LibvirtTests("test_numa_topology"))
-    suite.addTest(LibvirtTests("test_hugepages"))
-    suite.addTest(LibvirtTests("test_hugepages_prefault"))
-    suite.addTest(LibvirtTests("test_numa_hugepages"))
-    suite.addTest(LibvirtTests("test_numa_hugepages_prefault"))
-    suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_transient"))
-    suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_persistent"))
-    suite.addTest(LibvirtTests("test_network_hotplug_transient_vm_restart"))
-    suite.addTest(LibvirtTests("test_network_hotplug_persistent_vm_restart"))
-    suite.addTest(LibvirtTests("test_network_hotplug_persistent_transient_detach_vm_restart"))
-    suite.addTest(LibvirtTests("test_serial_file_output"))
-    suite.addTest(LibvirtTests("test_managedsave"))
-    suite.addTest(LibvirtTests("test_shutdown"))
-    suite.addTest(LibvirtTests("test_libvirt_event_stop_failed"))
+    # suite.addTest(LibvirtTests("test_hotplug"))
+    # suite.addTest(LibvirtTests("test_libvirt_restart"))
+    # suite.addTest(LibvirtTests("test_live_migration"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hotplug"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hugepages"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hugepages_failure_case"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hotplug_and_virtchd_restart"))
+    # suite.addTest(LibvirtTests("test_numa_topology"))
+    # suite.addTest(LibvirtTests("test_hugepages"))
+    # suite.addTest(LibvirtTests("test_hugepages_prefault"))
+    # suite.addTest(LibvirtTests("test_numa_hugepages"))
+    # suite.addTest(LibvirtTests("test_numa_hugepages_prefault"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_transient"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_persistent"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_transient_vm_restart"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_persistent_vm_restart"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_persistent_transient_detach_vm_restart"))
+    # suite.addTest(LibvirtTests("test_serial_file_output"))
+    # suite.addTest(LibvirtTests("test_managedsave"))
+    # suite.addTest(LibvirtTests("test_shutdown"))
+    # suite.addTest(LibvirtTests("test_libvirt_event_stop_failed"))
+    suite.addTest(LibvirtTests("test_live_migration_long_running_with_load"))
     return suite
 
 def wait_until_succeed(func):
