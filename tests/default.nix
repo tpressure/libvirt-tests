@@ -20,7 +20,7 @@ pkgs.nixosTest {
       ];
 
       virtualisation = {
-        cores = 8;
+        cores = 4;
         memorySize = 4096;
         interfaces = {
           eth1 = {
@@ -78,7 +78,7 @@ pkgs.nixosTest {
       '';
 
       virtualisation = {
-        cores = 8;
+        cores = 4;
         memorySize = 4096;
         interfaces = {
           eth1 = {
