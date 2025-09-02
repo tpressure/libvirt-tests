@@ -18,7 +18,7 @@ let
       <memory unit='KiB'>2097152</memory>
       <currentMemory unit='KiB'>2097152</currentMemory>
       ${if numa then ''
-      <vcpu placement='static'>4</vcpu>
+      <vcpu placement='static'>8</vcpu>
       <cputune>
         <vcpupin vcpu='0' cpuset='0-1'/>
         <vcpupin vcpu='1' cpuset='0-1'/>
@@ -52,7 +52,7 @@ let
       </memoryBacking>
       '' else '''' }
       '' else ''
-      <vcpu placement='static'>2</vcpu>
+      <vcpu placement='static'>8</vcpu>
       ${if hugepages then ''
       <memoryBacking>
         <hugepages>
