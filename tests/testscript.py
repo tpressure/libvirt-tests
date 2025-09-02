@@ -822,7 +822,7 @@ class LibvirtTests(unittest.TestCase):
             "virsh -c ch:///session attach-disk --domain testvm --target vdb --persistent --source /var/lib/libvirt/storage-pools/nfs-share/disk.img"
         )
 
-        status, _ = ssh(controllerVM, "screen -dmS stress stress -m 8 --vm-bytes 200M")
+        status, _ = ssh(controllerVM, "screen -dmS stress stress -m 4 --vm-bytes 400M")
         assert status == 0
 
         for i in range(1000):

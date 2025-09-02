@@ -12,8 +12,9 @@
       flake = false;
     };
     cloud-hypervisor-src = {
-      # url = "git+file::<path/to/cloud-hypervisor>";
-      url = "github:cyberus-technology/cloud-hypervisor?ref=gardenlinux";
+      # url = "git+file:/home/tprescher/cloud-hypervisor";
+      url = "github:tpressure/cloud-hypervisor?ref=cyberus-fork-poc-precopy-autoconverge";
+      #  url = "github:cyberus-technology/cloud-hypervisor?ref=gardenlinux";
       flake = false;
     };
     # Nix tooling to build cloud-hypervisor.
