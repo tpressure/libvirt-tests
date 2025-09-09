@@ -17,7 +17,7 @@ let
   commonArgs = {
     meta = cloud-hypervisor-meta;
 
-    src = craneLib'.cleanCargoSource cloud-hypervisor-src;
+    src = cloud-hypervisor-src;
 
     patches =
       let

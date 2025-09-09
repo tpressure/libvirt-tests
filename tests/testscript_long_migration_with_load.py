@@ -19,6 +19,10 @@ class LibvirtTests(unittest.TestCase):
         controllerVM.succeed("chmod 0666 /nfs-root/nixos.img")
         controllerVM.succeed("cp /etc/cirros.img /nfs-root/")
         controllerVM.succeed("chmod 0666 /nfs-root/cirros.img")
+        controllerVM.succeed("cp /etc/ubuntu.img /nfs-root/")
+        controllerVM.succeed("chmod 0666 /nfs-root/ubuntu.img")
+        controllerVM.succeed("cp /etc/ubuntu-cloudinit.img /nfs-root/")
+        controllerVM.succeed("chmod 0666 /nfs-root/ubuntu-cloudinit.img")
 
         controllerVM.succeed(
             'virt-admin -c virtchd:///system daemon-log-outputs "2:journald 1:file:/var/log/libvirt/libvirtd.log"'
@@ -88,8 +92,8 @@ class LibvirtTests(unittest.TestCase):
         of roughly 1.6GiB.
         """
 
-        controllerVM.succeed("virsh -c ch:///session define /etc/domain-chv.xml")
-        controllerVM.succeed("virsh -c ch:///session start testvm")
+        controllerVM.succeed("virsh define /etc/domain-chv.xml")
+        controllerVM.succeed("virsh start testvm")
 
         assert wait_for_ssh(controllerVM)
 
@@ -101,18 +105,51 @@ class LibvirtTests(unittest.TestCase):
             print(f"Run {i+1}/{run_loops}")
 
             controllerVM.succeed(
-                "virsh -c ch:///session migrate --domain testvm --desturi ch+tcp://computeVM/session --persistent --live --p2p"
+                "virsh migrate --domain testvm --desturi ch+tcp://computeVM/session --persistent --live --p2p"
             )
             assert wait_for_ssh(computeVM)
 
             computeVM.succeed(
-                "virsh -c ch:///session migrate --domain testvm --desturi ch+tcp://controllerVM/session --persistent --live --p2p"
+                "virsh migrate --domain testvm --desturi ch+tcp://controllerVM/session --persistent --live --p2p"
             )
             assert wait_for_ssh(controllerVM)
 
+    def test_ubuntu_boot_loop(self):
+        """
+        xxx: to reproduce SAP pipeline failur
+        """
+
+        controllerVM.succeed("virsh define /etc/domain-ubuntu.xml")
+
+        run_loops = 500
+        for i in range(run_loops):
+            print(f"Run {i+1}/{run_loops}")
+            controllerVM.succeed("cp /etc/ubuntu.img /nfs-root/")
+            controllerVM.succeed("chmod 0666 /nfs-root/ubuntu.img")
+            controllerVM.succeed("cp /etc/ubuntu-cloudinit.img /nfs-root/")
+            controllerVM.succeed("chmod 0666 /nfs-root/ubuntu-cloudinit.img")
+
+            controllerVM.succeed("virsh start VM-CHV")
+            assert wait_for_ssh(controllerVM, "cloud", "cloud123")
+
+            status, _ = ssh(controllerVM, "sudo dmesg | grep Timed", "cloud", "cloud123")
+            # breakpoint()
+
+            if status == 0:
+                print("------------- ERROR --------------")
+                breakpoint()
+            assert(status != 0)
+
+            controllerVM.succeed("virsh destroy VM-CHV")
+
+
+
+
+
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(LibvirtTests("test_live_migration_long_running_with_load"))
+    # suite.addTest(LibvirtTests("test_live_migration_long_running_with_load"))
+    suite.addTest(LibvirtTests("test_ubuntu_boot_loop"))
     return suite
 
 def wait_for_ssh(machine, user="root", password="root", ip="192.168.1.2"):

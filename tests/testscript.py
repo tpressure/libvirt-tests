@@ -20,6 +20,10 @@ class LibvirtTests(unittest.TestCase):
         controllerVM.succeed("chmod 0666 /nfs-root/nixos.img")
         controllerVM.succeed("cp /etc/cirros.img /nfs-root/")
         controllerVM.succeed("chmod 0666 /nfs-root/cirros.img")
+        controllerVM.succeed("cp /etc/ubuntu.img /nfs-root/")
+        controllerVM.succeed("chmod 0666 /nfs-root/ubuntu.img")
+        controllerVM.succeed("cp /etc/ubuntu-cloudinit.img /nfs-root/")
+        controllerVM.succeed("chmod 0666 /nfs-root/ubuntu-cloudinit.img")
 
         controllerVM.succeed(
             'virt-admin -c virtchd:///system daemon-log-outputs "2:journald 1:file:/var/log/libvirt/libvirtd.log"'
@@ -247,6 +251,7 @@ class LibvirtTests(unittest.TestCase):
 
     def test_hotplug(self):
         # Using define + start creates a "persistent" domain rather than a transient
+        breakpoint()
         controllerVM.succeed("virsh define /etc/domain-chv.xml")
         controllerVM.succeed("virsh start testvm")
 

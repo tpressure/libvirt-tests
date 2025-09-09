@@ -20,7 +20,7 @@ pkgs.nixosTest {
 
     virtualisation = {
       cores = 4;
-      memorySize = 4096;
+      memorySize = 8192;
       interfaces.eth1.vlan = 1;
       diskSize = 8192;
       forwardPorts = [

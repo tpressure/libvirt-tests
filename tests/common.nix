@@ -6,9 +6,69 @@ let
     hash = "sha256-B+RKc+VMlNmIAoUVQDwe12IFXgG4OnZ+3zwrOH94zgA=";
   };
 
+  ubuntu_qcow = pkgs.fetchurl {
+    url = "https://cloud-images.ubuntu.com/minimal/releases/oracular/release/ubuntu-24.10-minimal-cloudimg-amd64.img";
+    hash = "sha256-yt2ThJVUCo/PUjrFfru6+PronPyrDUYk3D5rkdKJcRA=";
+  };
+
   cirros_raw = pkgs.runCommand "cirros_raw" { } ''
     ${pkgs.qemu-utils}/bin/qemu-img convert -O raw ${cirros_qcow} $out
   '';
+
+  ubuntu_raw = pkgs.runCommand "ubuntu_raw" { } ''
+    ${pkgs.qemu-utils}/bin/qemu-img convert -O raw ${ubuntu_qcow} $out
+  '';
+
+  ubuntu_cloud_init_img = pkgs.runCommand "ubuntu_cloud_init_img" { } ''
+    ${pkgs.dosfstools}/bin/mkdosfs -n CIDATA -C ./ubuntu-cloudinit.img 8192
+    ${pkgs.mtools}/bin/mcopy -oi ./ubuntu-cloudinit.img -s ${pkgs.cloud-hypervisor.src}/test_data/cloud-init/ubuntu/local/user-data ::
+
+    ${pkgs.mtools}/bin/mcopy -oi ./ubuntu-cloudinit.img -s ${pkgs.cloud-hypervisor.src}/test_data/cloud-init/ubuntu/local/meta-data ::
+
+    echo -e "network:\n    version: 2\n    ethernets:\n        ens4:\n            addresses: [192.168.1.2/24]" > network-config
+    ${pkgs.mtools}/bin/mcopy -oi ./ubuntu-cloudinit.img -s ./network-config ::
+
+
+
+    mv ./ubuntu-cloudinit.img $out
+  '';
+
+  virsh_ubuntu_xml = {}:
+  ''
+    <domain type='kvm'>
+        <name>VM-CHV</name>
+        <memory unit='GiB'>2</memory>
+        <vcpu placement='static'>1</vcpu>
+        <os>
+            <type arch='x86_64' machine='pc'>hvm</type>
+            <!-- see https://github.com/cloud-hypervisor/rust-hypervisor-firmware/issues/382 -->
+            <kernel>/etc/CLOUDHV.fd</kernel>
+        </os>
+        <cpu mode='host-passthrough' check='none' migratable='on' />
+        <devices>
+            <disk type='file' device='disk'>
+                <source file='/var/lib/libvirt/storage-pools/nfs-share/ubuntu.img' />
+                <target dev='hda' bus='virtio' />
+            </disk>
+            <disk type='file' device='cdrom'>
+                <source file='/var/lib/libvirt/storage-pools/nfs-share/ubuntu-cloudinit.img' />
+                <target dev='hdb' bus='virtio' />
+                <readonly />
+            </disk>
+            <interface type='ethernet'>
+              <mac address='52:54:00:e5:b8:ef'/>
+              <target dev='vnet0'/>
+              <model type='virtio'/>
+              <driver queues='1'/>
+            </interface>
+            <serial type='pty'>
+              <source path='/dev/pts/2'/>
+              <target port='0'/>
+            </serial>
+        </devices>
+    </domain>
+  '';
+
 
   virsh_ch_xml = { image ? "/var/lib/libvirt/storage-pools/nfs-share/nixos.img", numa ? false, hugepages ? false, prefault ? false, serial ? "pty" }:
   ''
@@ -282,6 +342,21 @@ in
         "/etc/cirros.img" = {
           "L+" = {
             argument = "${cirros_raw}";
+          };
+        };
+        "/etc/ubuntu.img" = {
+          "L+" = {
+            argument = "${ubuntu_raw}";
+          };
+        };
+        "/etc/ubuntu-cloudinit.img" = {
+          "L+" = {
+            argument = "${ubuntu_cloud_init_img}";
+          };
+        };
+        "/etc/domain-ubuntu.xml" = {
+          "C+" = {
+            argument = "${pkgs.writeText "domain-ubuntu.xml" (virsh_ubuntu_xml {})}";
           };
         };
         "/etc/domain-chv.xml" = {
