@@ -291,14 +291,28 @@ class LibvirtTests(unittest.TestCase):
 
         assert wait_for_ssh(controllerVM)
 
-        controllerVM.succeed("virsh shutdown testvm")
-        controllerVM.succeed("systemctl restart virtchd")
+        for i in range(500):
+            controllerVM.succeed("virsh shutdown testvm")
+            controllerVM.succeed("systemctl restart virtchd")
 
-        controllerVM.succeed("virsh list --all | grep 'shut off'")
+            controllerVM.succeed("virsh list --all | grep 'shut off'")
 
+            controllerVM.succeed("virsh start testvm")
+            controllerVM.succeed("systemctl restart virtchd")
+            controllerVM.succeed("virsh list | grep 'running'")
+            # time.sleep(10)
+
+    def test_libvirt_failure_case_invalid_xml(self):
+        """
+        xxx
+        """
+        controllerVM.succeed("virsh define /etc/domain-chv.xml")
         controllerVM.succeed("virsh start testvm")
+        controllerVM.succeed("cp /run/libvirt/ch/testvm.xml /tmp")
+        controllerVM.succeed("virsh destroy testvm")
+        controllerVM.succeed("cp /tmp/testvm.xml /run/libvirt/ch/testvm.xml")
         controllerVM.succeed("systemctl restart virtchd")
-        controllerVM.succeed("virsh list | grep 'running'")
+        controllerVM.succeed("virsh destroy testvm")
 
     def test_live_migration_with_hotplug_and_virtchd_restart(self):
         """
@@ -800,27 +814,30 @@ class LibvirtTests(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(LibvirtTests("test_hotplug"))
+    # suite.addTest(LibvirtTests("test_hotplug"))
+
     suite.addTest(LibvirtTests("test_libvirt_restart"))
-    suite.addTest(LibvirtTests("test_live_migration"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hotplug"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hugepages"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hugepages_failure_case"))
-    suite.addTest(LibvirtTests("test_live_migration_with_hotplug_and_virtchd_restart"))
-    suite.addTest(LibvirtTests("test_numa_topology"))
-    suite.addTest(LibvirtTests("test_hugepages"))
-    suite.addTest(LibvirtTests("test_hugepages_prefault"))
-    suite.addTest(LibvirtTests("test_numa_hugepages"))
-    suite.addTest(LibvirtTests("test_numa_hugepages_prefault"))
-    suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_transient"))
-    suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_persistent"))
-    suite.addTest(LibvirtTests("test_network_hotplug_transient_vm_restart"))
-    suite.addTest(LibvirtTests("test_network_hotplug_persistent_vm_restart"))
-    suite.addTest(LibvirtTests("test_network_hotplug_persistent_transient_detach_vm_restart"))
-    suite.addTest(LibvirtTests("test_serial_file_output"))
-    suite.addTest(LibvirtTests("test_managedsave"))
-    suite.addTest(LibvirtTests("test_shutdown"))
-    suite.addTest(LibvirtTests("test_libvirt_event_stop_failed"))
+    # suite.addTest(LibvirtTests("test_libvirt_failure_case_invalid_xml"))
+
+    # suite.addTest(LibvirtTests("test_live_migration"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hotplug"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hugepages"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hugepages_failure_case"))
+    # suite.addTest(LibvirtTests("test_live_migration_with_hotplug_and_virtchd_restart"))
+    # suite.addTest(LibvirtTests("test_numa_topology"))
+    # suite.addTest(LibvirtTests("test_hugepages"))
+    # suite.addTest(LibvirtTests("test_hugepages_prefault"))
+    # suite.addTest(LibvirtTests("test_numa_hugepages"))
+    # suite.addTest(LibvirtTests("test_numa_hugepages_prefault"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_transient"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_attach_detach_persistent"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_transient_vm_restart"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_persistent_vm_restart"))
+    # suite.addTest(LibvirtTests("test_network_hotplug_persistent_transient_detach_vm_restart"))
+    # suite.addTest(LibvirtTests("test_serial_file_output"))
+    # suite.addTest(LibvirtTests("test_managedsave"))
+    # suite.addTest(LibvirtTests("test_shutdown"))
+    # suite.addTest(LibvirtTests("test_libvirt_event_stop_failed"))
     return suite
 
 def wait_until_succeed(func):

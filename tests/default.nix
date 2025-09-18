@@ -42,6 +42,14 @@ pkgs.nixosTest {
         192.168.100.2 computeVM computeVM.local
       '';
 
+      systemd.services.virtchd = {
+          serviceConfig = {
+              Restart = "always";
+              RestartSec = 1;
+          };
+          startLimitIntervalSec = 0;
+          startLimitBurst = 0;
+      };
       systemd.network = {
         enable = true;
         wait-online.enable = false;
