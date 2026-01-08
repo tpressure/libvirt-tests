@@ -1,0 +1,55 @@
+From 30e5716aaf252809b4fb9328c0c85fe32004fca6 Mon Sep 17 00:00:00 2001
+From: Thomas Prescher <thomas.prescher@cyberus-technology.de>
+Date: Thu, 8 Jan 2026 20:35:52 +0100
+Subject: [PATCH] xxx
+
+---
+ .../Library/AcpiTimerLib/AcpiTimerLib.c        | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/UefiPayloadPkg/Library/AcpiTimerLib/AcpiTimerLib.c b/UefiPayloadPkg/Library/AcpiTimerLib/AcpiTimerLib.c
+index 8c4136609d..224b892830 100644
+--- a/UefiPayloadPkg/Library/AcpiTimerLib/AcpiTimerLib.c
++++ b/UefiPayloadPkg/Library/AcpiTimerLib/AcpiTimerLib.c
+@@ -89,6 +89,12 @@ InternalAcpiDelay (
+   UINT32  Ticks;
+   UINT32  Times;
+ 
++  DEBUG ((
++    DEBUG_INFO,
++    "Enter InternalAcpiDelay %lx\n",
++    Delay
++    ));
++
+   Times  = Delay >> 22;
+   Delay &= BIT22 - 1;
+   do {
+@@ -97,6 +103,12 @@ InternalAcpiDelay (
+     //
+     Ticks = InternalAcpiGetTimerTick () + Delay;
+     Delay = BIT22;
++  DEBUG ((
++    DEBUG_INFO,
++    " Ticks:%lx\n Delay:%lx\n",
++    Ticks,
++    Delay
++    ));
+     //
+     // Wait until time out
+     // Delay >= 2^23 could not be handled by this function
+@@ -106,6 +118,12 @@ InternalAcpiDelay (
+       CpuPause ();
+     }
+   } while (Times-- > 0);
++
++  DEBUG ((
++    DEBUG_INFO,
++    "Leaving InternalAcpiDelay\n",
++    ));
++
+ }
+ 
+ /**
+-- 
+2.52.0
+
