@@ -3,10 +3,10 @@
     "cloud-hypervisor-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1767880529,
-        "narHash": "sha256-3RRrNo+KzL62nzIqXBdfI/ilfDBH16cgSY87hBcOqJY=",
-        "rev": "3fe978e9e659908c847df756f0e0c54ae7eade84",
-        "revCount": 9250,
+        "lastModified": 1767890156,
+        "narHash": "sha256-Wql2/8S7JjXEJhTsxkxSCo9sYiM0rG52voxfbwWddzM=",
+        "rev": "7cc0496f3d146c4fc76d8b2db95e8f8b390ccbc2",
+        "revCount": 9251,
         "type": "git",
         "url": "file:/home/gonzo/cloud-hypervisor"
       },
@@ -90,6 +90,7 @@
       "locked": {
         "lastModified": 1767880221,
         "narHash": "sha256-X3jH+lsCKGYXe2h4upb07hS8F7sudM6mVBcRYSZxcC4=",
+        "ref": "refs/heads/stuck_boot",
         "rev": "53525448c4d91c125920ab484a49071fe9e645d8",
         "revCount": 53556,
         "submodules": true,

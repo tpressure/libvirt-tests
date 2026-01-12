@@ -1,19 +1,19 @@
-From 244cf56ebfc0566df0dc3a51ed207ec9de10629b Mon Sep 17 00:00:00 2001
+From b05ebd63b55d314ca03de360436f6f5c35472e4d Mon Sep 17 00:00:00 2001
 From: Thomas Prescher <thomas.prescher@cyberus-technology.de>
-Date: Mon, 12 Jan 2026 11:25:13 +0100
+Date: Mon, 12 Jan 2026 19:35:13 +0100
 Subject: [PATCH] xxx
 
 ---
- MdePkg/Library/DxeRngLib/DxeRngLib.c     | 16 +++++++++++
- MdePkg/Library/PeiRngLib/PeiRngLib.c     | 17 ++++++++++++
+ MdePkg/Library/DxeRngLib/DxeRngLib.c     | 16 +++++++++
+ MdePkg/Library/PeiRngLib/PeiRngLib.c     | 17 +++++++++
  NetworkPkg/Library/DxeNetLib/DxeNetLib.c |  4 +++
  OvmfPkg/Library/VirtioLib/VirtioLib.c    |  4 +++
- OvmfPkg/VirtioBlkDxe/VirtioBlk.c         |  9 +++++++
- OvmfPkg/VirtioFsDxe/Helpers.c            |  8 ++++++
- OvmfPkg/VirtioGpuDxe/Commands.c          |  8 ++++++
- OvmfPkg/VirtioRngDxe/VirtioRng.c         | 34 ++++++++++++++++++++++++
- OvmfPkg/VirtioScsiDxe/VirtioScsi.c       | 12 +++++++++
- 9 files changed, 112 insertions(+)
+ OvmfPkg/VirtioBlkDxe/VirtioBlk.c         |  9 +++++
+ OvmfPkg/VirtioFsDxe/Helpers.c            |  8 +++++
+ OvmfPkg/VirtioGpuDxe/Commands.c          |  8 +++++
+ OvmfPkg/VirtioRngDxe/VirtioRng.c         | 45 ++++++++++++++++++++++++
+ OvmfPkg/VirtioScsiDxe/VirtioScsi.c       | 12 +++++++
+ 9 files changed, 123 insertions(+)
 
 diff --git a/MdePkg/Library/DxeRngLib/DxeRngLib.c b/MdePkg/Library/DxeRngLib/DxeRngLib.c
 index fcd489aabd..4ed9b44feb 100644
@@ -222,7 +222,7 @@ index df79a5f8af..d6c9acb380 100644
      goto UnmapResponse;
    }
 diff --git a/OvmfPkg/VirtioRngDxe/VirtioRng.c b/OvmfPkg/VirtioRngDxe/VirtioRng.c
-index 8959e51faf..9f7b501127 100644
+index 8959e51faf..4d59319f6c 100644
 --- a/OvmfPkg/VirtioRngDxe/VirtioRng.c
 +++ b/OvmfPkg/VirtioRngDxe/VirtioRng.c
 @@ -25,6 +25,25 @@
@@ -251,21 +251,71 @@ index 8959e51faf..9f7b501127 100644
  /**
    Returns information about the random number generation implementation.
  
-@@ -182,6 +201,13 @@ VirtioRngGetRNG (
+@@ -137,10 +156,12 @@ VirtioRngGetRNG (
+   EFI_PHYSICAL_ADDRESS  DeviceAddress;
+   VOID                  *Mapping;
+ 
++  /* DEBUG (( DEBUG_INFO, "  rng:%d\n", __LINE__ )); */
+   if ((This == NULL) || (RNGValueLength == 0) || (RNGValue == NULL)) {
+     return EFI_INVALID_PARAMETER;
+   }
+ 
++  /* DEBUG (( DEBUG_INFO, "  rng:%d\n", __LINE__ )); */
+   //
+   // We only support the raw algorithm, so reject requests for anything else
+   //
+@@ -149,17 +170,20 @@ VirtioRngGetRNG (
+   {
+     return EFI_UNSUPPORTED;
+   }
++  /* DEBUG (( DEBUG_INFO, "  rng:%d\n", __LINE__ )); */
+ 
+   Buffer = (volatile UINT8 *)AllocatePool (RNGValueLength);
+   if (Buffer == NULL) {
+     return EFI_DEVICE_ERROR;
+   }
++  /* DEBUG (( DEBUG_INFO, "  rng:%d\n", __LINE__ )); */
+ 
+   Dev = VIRTIO_ENTROPY_SOURCE_FROM_RNG (This);
+   if (!Dev->Ready) {
+     DEBUG ((DEBUG_INFO, "%a: not ready\n", __func__));
+     return EFI_DEVICE_ERROR;
+   }
++  /* DEBUG (( DEBUG_INFO, "  rng:%d\n", __LINE__ )); */
+ 
+   //
+   // Map Buffer's system physical address to device address
+@@ -172,16 +196,29 @@ VirtioRngGetRNG (
+              &DeviceAddress,
+              &Mapping
+              );
++  /* DEBUG (( DEBUG_INFO, "  rng:%d\n", __LINE__ )); */
+   if (EFI_ERROR (Status)) {
+     Status = EFI_DEVICE_ERROR;
+     goto FreeBuffer;
+   }
++  /* DEBUG (( DEBUG_INFO, "  rng:%d\n", __LINE__ )); */
+ 
+   //
+   // The Virtio RNG device may return less data than we asked it to, and can
    // only return MAX_UINT32 bytes per invocation. So loop as long as needed to
    // get all the entropy we were asked for.
    //
 +
 +  unsigned count = rng_counter++;
++  EFI_TPL  CurrentTpl;
 +
++  CurrentTpl = gBS->RaiseTPL (TPL_HIGH_LEVEL);
 +  DEBUG ((
 +    DEBUG_INFO,
-+    "Enter RNG loop from apic-id %x: %ld\n", GetApicIdViaCpuid(), count
++    "Enter RNG loop from apic-id:%x TPL:%x: %ld\n", GetApicIdViaCpuid(), CurrentTpl, count
 +    ));
++  gBS->RestoreTPL (CurrentTpl);
++
    for (Index = 0; Index < RNGValueLength; Index += Len) {
      BufferSize = (UINT32)MIN (RNGValueLength - Index, (UINTN)MAX_UINT32);
  
-@@ -197,6 +223,10 @@ VirtioRngGetRNG (
+@@ -197,6 +234,10 @@ VirtioRngGetRNG (
      if (VirtioFlush (Dev->VirtIo, 0, &Dev->Ring, &Indices, &Len) !=
          EFI_SUCCESS)
      {
@@ -276,7 +326,7 @@ index 8959e51faf..9f7b501127 100644
        Status = EFI_DEVICE_ERROR;
        goto UnmapBuffer;
      }
-@@ -204,6 +234,10 @@ VirtioRngGetRNG (
+@@ -204,6 +245,10 @@ VirtioRngGetRNG (
      ASSERT (Len > 0);
      ASSERT (Len <= BufferSize);
    }
