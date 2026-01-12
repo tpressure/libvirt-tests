@@ -1,55 +1,325 @@
-From 30e5716aaf252809b4fb9328c0c85fe32004fca6 Mon Sep 17 00:00:00 2001
+From 244cf56ebfc0566df0dc3a51ed207ec9de10629b Mon Sep 17 00:00:00 2001
 From: Thomas Prescher <thomas.prescher@cyberus-technology.de>
-Date: Thu, 8 Jan 2026 20:35:52 +0100
+Date: Mon, 12 Jan 2026 11:25:13 +0100
 Subject: [PATCH] xxx
 
 ---
- .../Library/AcpiTimerLib/AcpiTimerLib.c        | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ MdePkg/Library/DxeRngLib/DxeRngLib.c     | 16 +++++++++++
+ MdePkg/Library/PeiRngLib/PeiRngLib.c     | 17 ++++++++++++
+ NetworkPkg/Library/DxeNetLib/DxeNetLib.c |  4 +++
+ OvmfPkg/Library/VirtioLib/VirtioLib.c    |  4 +++
+ OvmfPkg/VirtioBlkDxe/VirtioBlk.c         |  9 +++++++
+ OvmfPkg/VirtioFsDxe/Helpers.c            |  8 ++++++
+ OvmfPkg/VirtioGpuDxe/Commands.c          |  8 ++++++
+ OvmfPkg/VirtioRngDxe/VirtioRng.c         | 34 ++++++++++++++++++++++++
+ OvmfPkg/VirtioScsiDxe/VirtioScsi.c       | 12 +++++++++
+ 9 files changed, 112 insertions(+)
 
-diff --git a/UefiPayloadPkg/Library/AcpiTimerLib/AcpiTimerLib.c b/UefiPayloadPkg/Library/AcpiTimerLib/AcpiTimerLib.c
-index 8c4136609d..224b892830 100644
---- a/UefiPayloadPkg/Library/AcpiTimerLib/AcpiTimerLib.c
-+++ b/UefiPayloadPkg/Library/AcpiTimerLib/AcpiTimerLib.c
-@@ -89,6 +89,12 @@ InternalAcpiDelay (
-   UINT32  Ticks;
-   UINT32  Times;
+diff --git a/MdePkg/Library/DxeRngLib/DxeRngLib.c b/MdePkg/Library/DxeRngLib/DxeRngLib.c
+index fcd489aabd..4ed9b44feb 100644
+--- a/MdePkg/Library/DxeRngLib/DxeRngLib.c
++++ b/MdePkg/Library/DxeRngLib/DxeRngLib.c
+@@ -164,6 +164,10 @@ GenerateRandomNumberViaNist800Algorithm (
+     return EFI_NOT_FOUND;
+   }
  
 +  DEBUG ((
 +    DEBUG_INFO,
-+    "Enter InternalAcpiDelay %lx\n",
-+    Delay
++    "RNG DXE line %d\n", __LINE__
 +    ));
-+
-   Times  = Delay >> 22;
-   Delay &= BIT22 - 1;
-   do {
-@@ -97,6 +103,12 @@ InternalAcpiDelay (
-     //
-     Ticks = InternalAcpiGetTimerTick () + Delay;
-     Delay = BIT22;
+   // Try the first available algorithm.
+   if (mFirstAlgo != MAX_UINTN) {
+     Algo   = &mSecureHashAlgorithms[mFirstAlgo];
+@@ -271,6 +275,10 @@ GetRandomNumber32 (
+   )
+ {
+   EFI_STATUS  Status;
 +  DEBUG ((
 +    DEBUG_INFO,
-+    " Ticks:%lx\n Delay:%lx\n",
-+    Ticks,
-+    Delay
++    "RNG DXE line %d\n", __LINE__
 +    ));
-     //
-     // Wait until time out
-     // Delay >= 2^23 could not be handled by this function
-@@ -106,6 +118,12 @@ InternalAcpiDelay (
-       CpuPause ();
-     }
-   } while (Times-- > 0);
-+
-+  DEBUG ((
-+    DEBUG_INFO,
-+    "Leaving InternalAcpiDelay\n",
-+    ));
-+
- }
  
+   if (Rand == NULL) {
+     return FALSE;
+@@ -302,6 +310,10 @@ GetRandomNumber64 (
+   )
+ {
+   EFI_STATUS  Status;
++  DEBUG ((
++    DEBUG_INFO,
++    "RNG DXE line %d\n", __LINE__
++    ));
+ 
+   if (Rand == NULL) {
+     return FALSE;
+@@ -333,6 +345,10 @@ GetRandomNumber128 (
+   )
+ {
+   EFI_STATUS  Status;
++  DEBUG ((
++    DEBUG_INFO,
++    "RNG DXE line %d\n", __LINE__
++    ));
+ 
+   if (Rand == NULL) {
+     return FALSE;
+diff --git a/MdePkg/Library/PeiRngLib/PeiRngLib.c b/MdePkg/Library/PeiRngLib/PeiRngLib.c
+index ed70573ab0..77bbb4051f 100644
+--- a/MdePkg/Library/PeiRngLib/PeiRngLib.c
++++ b/MdePkg/Library/PeiRngLib/PeiRngLib.c
+@@ -101,6 +101,11 @@ GetRandomNumber16 (
+ {
+   EFI_STATUS  Status;
+ 
++  DEBUG ((
++    DEBUG_INFO,
++    "RNG line %d\n", __LINE__
++    ));
++
+   if (Rand == NULL) {
+     return FALSE;
+   }
+@@ -131,6 +136,10 @@ GetRandomNumber32 (
+   )
+ {
+   EFI_STATUS  Status;
++  DEBUG ((
++    DEBUG_INFO,
++    "RNG line %d\n", __LINE__
++    ));
+ 
+   if (Rand == NULL) {
+     return FALSE;
+@@ -162,6 +171,10 @@ GetRandomNumber64 (
+   )
+ {
+   EFI_STATUS  Status;
++  DEBUG ((
++    DEBUG_INFO,
++    "RNG line %d\n", __LINE__
++    ));
+ 
+   if (Rand == NULL) {
+     return FALSE;
+@@ -193,6 +206,10 @@ GetRandomNumber128 (
+   )
+ {
+   EFI_STATUS  Status;
++  DEBUG ((
++    DEBUG_INFO,
++    "RNG line %d\n", __LINE__
++    ));
+ 
+   if (Rand == NULL) {
+     return FALSE;
+diff --git a/NetworkPkg/Library/DxeNetLib/DxeNetLib.c b/NetworkPkg/Library/DxeNetLib/DxeNetLib.c
+index eef3386ebb..53fe7ca59f 100644
+--- a/NetworkPkg/Library/DxeNetLib/DxeNetLib.c
++++ b/NetworkPkg/Library/DxeNetLib/DxeNetLib.c
+@@ -945,6 +945,10 @@ PseudoRandom (
+     return Status;
+   }
+ 
++  DEBUG ((
++    DEBUG_INFO,
++    "DxeNetLib line %d\n", __LINE__
++    ));
+   if (PcdGetBool (PcdEnforceSecureRngAlgorithms)) {
+     for (AlgorithmIndex = 0; AlgorithmIndex < SECURE_HASH_ALGORITHMS_SIZE; AlgorithmIndex++) {
+       Status = RngProtocol->GetRNG (RngProtocol, mSecureHashAlgorithms[AlgorithmIndex], OutputLength, (UINT8 *)Output);
+diff --git a/OvmfPkg/Library/VirtioLib/VirtioLib.c b/OvmfPkg/Library/VirtioLib/VirtioLib.c
+index 28041dbec5..75f6c6935a 100644
+--- a/OvmfPkg/Library/VirtioLib/VirtioLib.c
++++ b/OvmfPkg/Library/VirtioLib/VirtioLib.c
+@@ -327,6 +327,10 @@ VirtioFlush (
+   PollPeriodUsecs = 1;
+   MemoryFence ();
+   while (*Ring->Used.Idx != NextAvailIdx) {
++    DEBUG ((
++      DEBUG_INFO,
++      "."
++      ));
+     gBS->Stall (PollPeriodUsecs); // calls AcpiTimerLib::MicroSecondDelay
+ 
+     if (PollPeriodUsecs < 1024) {
+diff --git a/OvmfPkg/VirtioBlkDxe/VirtioBlk.c b/OvmfPkg/VirtioBlkDxe/VirtioBlk.c
+index f881cde4c5..7de0cd5d83 100644
+--- a/OvmfPkg/VirtioBlkDxe/VirtioBlk.c
++++ b/OvmfPkg/VirtioBlkDxe/VirtioBlk.c
+@@ -424,6 +424,10 @@ SynchronousRequest (
+   //
+   // virtio-blk's only virtqueue is #0, called "requestq" (see Appendix D).
+   //
++  DEBUG ((
++      DEBUG_INFO,
++      "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\nXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX: VirtioBlk: Entering VirtioFlush\n"
++      ));
+   if ((VirtioFlush (
+          Dev->VirtIo,
+          0,
+@@ -437,6 +441,11 @@ SynchronousRequest (
+   } else {
+     Status = EFI_DEVICE_ERROR;
+   }
++  DEBUG ((
++      DEBUG_INFO,
++      "XXXXX VirtioBlk: Finished VirtioFlush\n"
++      ));
++
+ 
+   Dev->VirtIo->UnmapSharedBuffer (Dev->VirtIo, StatusMapping);
+ 
+diff --git a/OvmfPkg/VirtioFsDxe/Helpers.c b/OvmfPkg/VirtioFsDxe/Helpers.c
+index bc3c58cf41..8df88becdc 100644
+--- a/OvmfPkg/VirtioFsDxe/Helpers.c
++++ b/OvmfPkg/VirtioFsDxe/Helpers.c
+@@ -628,6 +628,10 @@ VirtioFsSgListsSubmit (
+   //
+   // Submit the descriptor chain.
+   //
++  DEBUG ((
++      DEBUG_INFO,
++      "XXXXX VirtioFS: Entering VirtioFlush\n"
++      ));
+   Status = VirtioFlush (
+              VirtioFs->Virtio,
+              VIRTIO_FS_REQUEST_QUEUE,
+@@ -635,6 +639,10 @@ VirtioFsSgListsSubmit (
+              &Indices,
+              &TotalBytesWrittenByDevice
+              );
++  DEBUG ((
++      DEBUG_INFO,
++      "XXXXX VirtioFS: Finished VirtioFlush\n"
++      ));
+   if (EFI_ERROR (Status)) {
+     goto Unmap;
+   }
+diff --git a/OvmfPkg/VirtioGpuDxe/Commands.c b/OvmfPkg/VirtioGpuDxe/Commands.c
+index df79a5f8af..d6c9acb380 100644
+--- a/OvmfPkg/VirtioGpuDxe/Commands.c
++++ b/OvmfPkg/VirtioGpuDxe/Commands.c
+@@ -498,6 +498,10 @@ VirtioGpuSendCommandWithReply (
+   //
+   // Send the command.
+   //
++  DEBUG ((
++      DEBUG_INFO,
++      "XXXXX VirtioGPU: Entering VirtioFlush\n"
++      ));
+   Status = VirtioFlush (
+              VgpuDev->VirtIo,
+              VIRTIO_GPU_CONTROL_QUEUE,
+@@ -505,6 +509,10 @@ VirtioGpuSendCommandWithReply (
+              &Indices,
+              &ResponseSizeRet
+              );
++  DEBUG ((
++      DEBUG_INFO,
++      "XXXXX VirtioGPU: Finished VirtioFlush\n"
++      ));
+   if (EFI_ERROR (Status)) {
+     goto UnmapResponse;
+   }
+diff --git a/OvmfPkg/VirtioRngDxe/VirtioRng.c b/OvmfPkg/VirtioRngDxe/VirtioRng.c
+index 8959e51faf..9f7b501127 100644
+--- a/OvmfPkg/VirtioRngDxe/VirtioRng.c
++++ b/OvmfPkg/VirtioRngDxe/VirtioRng.c
+@@ -25,6 +25,25 @@
+ 
+ #include "VirtioRng.h"
+ 
++static unsigned rng_counter = 0;
++
++STATIC
++UINT8
++GetApicIdViaCpuid (
++  VOID
++  )
++{
++  UINT32 Eax, Ebx, Ecx, Edx;
++
++  __asm__ __volatile__ (
++    "cpuid"
++    : "=a"(Eax), "=b"(Ebx), "=c"(Ecx), "=d"(Edx)
++    : "a"(1)
++    : "memory", "cc"
++  );
++
++  return (UINT8)(Ebx >> 24);
++}
  /**
+   Returns information about the random number generation implementation.
+ 
+@@ -182,6 +201,13 @@ VirtioRngGetRNG (
+   // only return MAX_UINT32 bytes per invocation. So loop as long as needed to
+   // get all the entropy we were asked for.
+   //
++
++  unsigned count = rng_counter++;
++
++  DEBUG ((
++    DEBUG_INFO,
++    "Enter RNG loop from apic-id %x: %ld\n", GetApicIdViaCpuid(), count
++    ));
+   for (Index = 0; Index < RNGValueLength; Index += Len) {
+     BufferSize = (UINT32)MIN (RNGValueLength - Index, (UINTN)MAX_UINT32);
+ 
+@@ -197,6 +223,10 @@ VirtioRngGetRNG (
+     if (VirtioFlush (Dev->VirtIo, 0, &Dev->Ring, &Indices, &Len) !=
+         EFI_SUCCESS)
+     {
++    DEBUG ((
++      DEBUG_INFO,
++      "Leaving RNG loop error %ld\n", count
++      ));
+       Status = EFI_DEVICE_ERROR;
+       goto UnmapBuffer;
+     }
+@@ -204,6 +234,10 @@ VirtioRngGetRNG (
+     ASSERT (Len > 0);
+     ASSERT (Len <= BufferSize);
+   }
++  DEBUG ((
++    DEBUG_INFO,
++    "Leaving RNG loop from apic-id %d: %ld\n", GetApicIdViaCpuid(), count
++    ));
+ 
+   //
+   // Unmap the device buffer before accessing it.
+diff --git a/OvmfPkg/VirtioScsiDxe/VirtioScsi.c b/OvmfPkg/VirtioScsiDxe/VirtioScsi.c
+index ac8c57660e..5d353b6e83 100644
+--- a/OvmfPkg/VirtioScsiDxe/VirtioScsi.c
++++ b/OvmfPkg/VirtioScsiDxe/VirtioScsi.c
+@@ -656,6 +656,10 @@ VirtioScsiPassThru (
+   // EFI_NOT_READY would save us the effort, but it would also suggest that the
+   // caller retry.
+   //
++  DEBUG ((
++      DEBUG_INFO,
++      "XXXXXXXXXXXXXXXXXXXXXXXXX: VirtioScsi: Entering VirtioFlush\n"
++      ));
+   if (VirtioFlush (
+         Dev->VirtIo,
+         VIRTIO_SCSI_REQUEST_QUEUE,
+@@ -664,9 +668,17 @@ VirtioScsiPassThru (
+         NULL
+         ) != EFI_SUCCESS)
+   {
++    DEBUG ((
++        DEBUG_INFO,
++        "XXXXX VirtioScsi: Finished VirtioFlush\n"
++        ));
+     Status = ReportHostAdapterError (Packet);
+     goto UnmapResponseBuffer;
+   }
++  DEBUG ((
++      DEBUG_INFO,
++      "XXXXX VirtioScsi: Finished VirtioFlush\n"
++      ));
+ 
+   Status = ParseResponse (Packet, Response);
+ 
 -- 
 2.52.0
 

@@ -86,7 +86,9 @@ class LibvirtTests(PrintLogsOnErrorTestCase):
         controllerVM.wait_for_unit("multi-user.target")
         computeVM.wait_for_unit("multi-user.target")
         controllerVM.succeed("cp /etc/nixos.img /nfs-root/")
+        controllerVM.succeed("cp /etc/nixos.img /nfs-root/nixos2.img")
         controllerVM.succeed("chmod 0666 /nfs-root/nixos.img")
+        controllerVM.succeed("chmod 0666 /nfs-root/nixos2.img")
         controllerVM.succeed("cp /etc/cirros.img /nfs-root/")
         controllerVM.succeed("chmod 0666 /nfs-root/cirros.img")
 
@@ -1561,44 +1563,87 @@ class LibvirtTests(PrintLogsOnErrorTestCase):
 
             check_certificates(computeVM)
 
+    def test_boot_loop(self):
+        count = 1
+        controllerVM.succeed("qemu-img create -f raw /tmp/disk.img 10M")
+        computeVM.succeed("qemu-img create -f raw /tmp/disk.img 10M")
+        while True:
+            print("\n\n\n-------- Running loop {} --------\n\n\n".format(count))
+            count = count + 1
+            # controllerVM.succeed("virsh define /etc/domain-chv.xml")
+            controllerVM.succeed("virsh define /etc/domain-chv-serial-file.xml")
+            controllerVM.succeed("virsh start testvm")
+
+
+            controllerVM.succeed(
+                "virsh attach-disk --domain testvm --target vdb --source /tmp/disk.img"
+            )
+            controllerVM.succeed(
+                "virsh attach-device testvm /etc/new_interface.xml"
+            )
+
+
+
+
+            # computeVM.succeed("virsh define /etc/domain-chv-serial-file2.xml")
+            # computeVM.succeed("virsh start testvm")
+
+            # computeVM.succeed(
+                # "virsh attach-disk --domain testvm --target vdb --source /tmp/disk.img"
+            # )
+            # computeVM.succeed(
+                # "virsh attach-device testvm /etc/new_interface.xml"
+            # )
+
+            if wait_for_ssh(controllerVM) == False:
+                print("XXXXX: ERROR connecting to VM")
+                breakpoint()
+            # if wait_for_ssh(computeVM) == False:
+                # print("XXXXX: ERROR connecting to VM")
+                # breakpoint()
+
+            controllerVM.succeed("virsh shutdown testvm")
+            # computeVM.succeed("virsh shutdown testvm")
+
 
 def suite():
     # Test cases in alphabetical order
     testcases = [
-        LibvirtTests.test_disk_is_locked,
-        LibvirtTests.test_disk_resize_qcow2,
-        LibvirtTests.test_disk_resize_raw,
-        LibvirtTests.test_hotplug,
-        LibvirtTests.test_hugepages,
-        LibvirtTests.test_hugepages_prefault,
-        LibvirtTests.test_libvirt_event_stop_failed,
-        LibvirtTests.test_libvirt_restart,
-        LibvirtTests.test_live_migration,
-        LibvirtTests.test_live_migration_kill_chv_on_receiver_side,
-        LibvirtTests.test_live_migration_kill_chv_on_sender_side,
-        LibvirtTests.test_live_migration_parallel_connections,
-        LibvirtTests.test_live_migration_tls,
-        LibvirtTests.test_live_migration_tls_without_certificates,
-        LibvirtTests.test_live_migration_virsh_non_blocking,
-        LibvirtTests.test_live_migration_with_hotplug,
-        LibvirtTests.test_live_migration_with_hotplug_and_virtchd_restart,
-        LibvirtTests.test_live_migration_with_hugepages,
-        LibvirtTests.test_live_migration_with_hugepages_failure_case,
-        LibvirtTests.test_live_migration_with_serial_tcp,
-        LibvirtTests.test_live_migration_with_vcpu_pinning,
-        LibvirtTests.test_managedsave,
-        LibvirtTests.test_network_hotplug_attach_detach_persistent,
-        LibvirtTests.test_network_hotplug_attach_detach_transient,
-        LibvirtTests.test_network_hotplug_persistent_transient_detach_vm_restart,
-        LibvirtTests.test_network_hotplug_persistent_vm_restart,
-        LibvirtTests.test_network_hotplug_transient_vm_restart,
-        LibvirtTests.test_numa_hugepages,
-        LibvirtTests.test_numa_hugepages_prefault,
-        LibvirtTests.test_numa_topology,
-        LibvirtTests.test_serial_file_output,
-        LibvirtTests.test_serial_tcp,
-        LibvirtTests.test_shutdown,
-        LibvirtTests.test_virsh_console_works_with_pty,
+        # LibvirtTests.test_disk_is_locked,
+        # LibvirtTests.test_disk_resize_qcow2,
+        # LibvirtTests.test_disk_resize_raw,
+        # LibvirtTests.test_hotplug,
+        # LibvirtTests.test_hugepages,
+        # LibvirtTests.test_hugepages_prefault,
+        # LibvirtTests.test_libvirt_event_stop_failed,
+        # LibvirtTests.test_libvirt_restart,
+        # LibvirtTests.test_live_migration,
+        # LibvirtTests.test_live_migration_kill_chv_on_receiver_side,
+        # LibvirtTests.test_live_migration_kill_chv_on_sender_side,
+        # LibvirtTests.test_live_migration_parallel_connections,
+        # LibvirtTests.test_live_migration_tls,
+        # LibvirtTests.test_live_migration_tls_without_certificates,
+        # LibvirtTests.test_live_migration_virsh_non_blocking,
+        # LibvirtTests.test_live_migration_with_hotplug,
+        # LibvirtTests.test_live_migration_with_hotplug_and_virtchd_restart,
+        # LibvirtTests.test_live_migration_with_hugepages,
+        # LibvirtTests.test_live_migration_with_hugepages_failure_case,
+        # LibvirtTests.test_live_migration_with_serial_tcp,
+        # LibvirtTests.test_live_migration_with_vcpu_pinning,
+        # LibvirtTests.test_managedsave,
+        # LibvirtTests.test_network_hotplug_attach_detach_persistent,
+        # LibvirtTests.test_network_hotplug_attach_detach_transient,
+        # LibvirtTests.test_network_hotplug_persistent_transient_detach_vm_restart,
+        # LibvirtTests.test_network_hotplug_persistent_vm_restart,
+        # LibvirtTests.test_network_hotplug_transient_vm_restart,
+        # LibvirtTests.test_numa_hugepages,
+        # LibvirtTests.test_numa_hugepages_prefault,
+        # LibvirtTests.test_numa_topology,
+        # LibvirtTests.test_serial_file_output,
+        # LibvirtTests.test_serial_tcp,
+        # LibvirtTests.test_shutdown,
+        # LibvirtTests.test_virsh_console_works_with_pty,
+        LibvirtTests.test_boot_loop,
     ]
 
     suite = unittest.TestSuite()

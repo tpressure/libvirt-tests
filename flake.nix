@@ -8,18 +8,19 @@
     # A local path can be used for developing or testing local changes. Make
     # sure the submodules in a local libvirt checkout are populated.
     libvirt-src = {
-      # url = "git+file:<path/to/libvirt>?submodules=1";
-      url = "git+https://github.com/cyberus-technology/libvirt?ref=gardenlinux&submodules=1";
+      url = "git+file:/home/gonzo/libvirt?submodules=1";
+      #  url = "git+https://github.com/cyberus-technology/libvirt?ref=gardenlinux&submodules=1";
       # url = "git+ssh://git@gitlab.cyberus-technology.de/cyberus/cloud/libvirt?ref=managedsave-fix&submodules=1";
       flake = false;
     };
     cloud-hypervisor-src = {
-      # url = "git+file:<path/to/cloud-hypervisor>";
-      url = "github:cyberus-technology/cloud-hypervisor?ref=gardenlinux";
+      url = "git+file:/home/gonzo/cloud-hypervisor";
+      #  url = "github:cyberus-technology/cloud-hypervisor?ref=gardenlinux";
       flake = false;
     };
     edk2-src = {
       url = "git+https://github.com/cyberus-technology/edk2?ref=gardenlinux&submodules=1";
+      #  url = "git+file:/home/gonzo/edk";
       flake = false;
     };
     # Nix tooling to build cloud-hypervisor.
@@ -85,9 +86,13 @@
 
         rust-bin = (rust-overlay.lib.mkRustBin { }) pkgs;
 
-        chv-ovmf = pkgs.OVMF-cloud-hypervisor.overrideAttrs (_old: {
+        ovmf-debug = pkgs.OVMF.override { debug = true; };
+        chv-ovmf' = (pkgs.OVMF-cloud-hypervisor.override { OVMF = ovmf-debug; });
+        chv-ovmf = chv-ovmf'.overrideAttrs (_old: {
           version = "cbs";
+          debug = true;
           src = edk2-src;
+          patches = [ ./0001-xxx.patch ];
         });
 
         nixos-image' =

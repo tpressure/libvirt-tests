@@ -406,6 +406,14 @@ in
             })}";
           };
         };
+        "/etc/domain-chv-serial-file2.xml" = {
+          "C+" = {
+            argument = "${pkgs.writeText "domain.xml" (virsh_ch_xml {
+              serial = "file";
+              image  = "/var/lib/libvirt/storage-pools/nfs-share/nixos2.img";
+            })}";
+          };
+        };
         "/etc/domain-chv-cirros.xml" = {
           "C+" = {
             argument = "${pkgs.writeText "domain-cirros.xml" (virsh_ch_xml {
