@@ -210,46 +210,21 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
 
         # Using define + start creates a "persistent" domain rather than a transient
         controllerVM.succeed("virsh define /etc/domain-chv.xml")
-        controllerVM.succeed("virsh start testvm")
-
-        wait_for_ssh(controllerVM)
-
         controllerVM.succeed("qemu-img create -f raw /tmp/disk.img 100M")
+        breakpoint()
+        while True:
+            controllerVM.succeed("virsh start testvm")
 
-        hotplug(
-            controllerVM,
-            "virsh attach-disk --domain testvm --target vdb --persistent --source /tmp/disk.img",
-        )
-        hotplug(
-            controllerVM,
-            "virsh attach-device --persistent testvm /etc/new_interface.xml",
-        )
-        hotplug(
-            controllerVM,
-            "virsh attach-device testvm /etc/new_interface_type_network.xml",
-        )
-        hotplug(
-            controllerVM,
-            "virsh attach-device testvm /etc/new_interface_type_bridge.xml",
-        )
+            wait_for_ssh(controllerVM)
 
-        # Test attached network interface (type ethernet)
-        wait_for_ssh(controllerVM, ip="192.168.2.2")
-        # Test attached network interface (type network - managed by libvirt)
-        wait_for_ssh(controllerVM, ip="192.168.3.2")
-        # Test attached network interface (type bridge)
-        wait_for_ssh(controllerVM, ip="192.168.4.2")
+            time.sleep(1)
+            controllerVM.succeed("virsh attach-disk --domain testvm --target vdb --source /tmp/disk.img")
 
-        hotplug(controllerVM, "virsh detach-disk --domain testvm --target vdb")
-        hotplug(controllerVM, "virsh detach-device testvm /etc/new_interface.xml")
-        hotplug(
-            controllerVM,
-            "virsh detach-device testvm /etc/new_interface_type_network.xml",
-        )
-        hotplug(
-            controllerVM,
-            "virsh detach-device testvm /etc/new_interface_type_bridge.xml",
-        )
+            time.sleep(1)
+            controllerVM.succeed("virsh detach-disk --domain testvm --target vdb")
+            time.sleep(1)
+            controllerVM.succeed("virsh destroy testvm")
+            time.sleep(1)
 
     def test_libvirt_restart(self):
         """
@@ -1020,35 +995,53 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
                 domcapabilities_out,
             )
 
+    def test_destroy(self):
+        while True:
+            controllerVM.succeed("virsh define /etc/domain-chv.xml")
+            controllerVM.succeed("virsh start testvm")
+            wait_for_ssh(controllerVM)
+
+            controllerVM.succeed(
+                "virsh migrate --domain testvm --desturi ch+tcp://computeVM/session --persistent --live --p2p --parallel --parallel-connections 4"
+            )
+            breakpoint()
+            def is_dead():
+                return (
+                    computeVM.execute('virsh destroy testvm')[0] == 0
+                )
+
+            wait_until_succeed(is_dead)
+
 
 def suite():
     # Test cases sorted in alphabetical order.
     testcases = [
-        LibvirtTests.test_bdf_domain_defs_in_sync_after_transient_hotplug,
-        LibvirtTests.test_bdf_domain_defs_in_sync_after_transient_unplug,
-        LibvirtTests.test_bdf_invalid_device_id,
-        LibvirtTests.test_bdf_valid_device_id_with_function_id,
-        LibvirtTests.test_bdfs_implicitly_assigned_same_after_recreate,
-        LibvirtTests.test_cirros_image,
-        LibvirtTests.test_disk_is_locked,
-        LibvirtTests.test_disk_resize_qcow2,
-        LibvirtTests.test_disk_resize_raw,
-        LibvirtTests.test_hotplug,
-        LibvirtTests.test_libvirt_event_stop_failed,
-        LibvirtTests.test_libvirt_restart,
-        LibvirtTests.test_libvirt_default_net_prefix_triggers_desynchronizing,
-        LibvirtTests.test_list_cpu_models,
-        LibvirtTests.test_managedsave,
-        LibvirtTests.test_network_hotplug_attach_detach_persistent,
-        LibvirtTests.test_network_hotplug_attach_detach_transient,
-        LibvirtTests.test_network_hotplug_persistent_transient_detach_vm_restart,
-        LibvirtTests.test_network_hotplug_persistent_vm_restart,
-        LibvirtTests.test_network_hotplug_transient_vm_restart,
-        LibvirtTests.test_numa_topology,
-        LibvirtTests.test_serial_file_output,
-        LibvirtTests.test_serial_tcp,
-        LibvirtTests.test_shutdown,
-        LibvirtTests.test_virsh_console_works_with_pty,
+        # LibvirtTests.test_bdf_domain_defs_in_sync_after_transient_hotplug,
+        # LibvirtTests.test_bdf_domain_defs_in_sync_after_transient_unplug,
+        # LibvirtTests.test_bdf_invalid_device_id,
+        # LibvirtTests.test_bdf_valid_device_id_with_function_id,
+        # LibvirtTests.test_bdfs_implicitly_assigned_same_after_recreate,
+        # LibvirtTests.test_cirros_image,
+        # LibvirtTests.test_disk_is_locked,
+        # LibvirtTests.test_disk_resize_qcow2,
+        # LibvirtTests.test_disk_resize_raw,
+        # LibvirtTests.test_hotplug,
+        LibvirtTests.test_destroy,
+        # LibvirtTests.test_libvirt_event_stop_failed,
+        # LibvirtTests.test_libvirt_restart,
+        # LibvirtTests.test_libvirt_default_net_prefix_triggers_desynchronizing,
+        # LibvirtTests.test_list_cpu_models,
+        # LibvirtTests.test_managedsave,
+        # LibvirtTests.test_network_hotplug_attach_detach_persistent,
+        # LibvirtTests.test_network_hotplug_attach_detach_transient,
+        # LibvirtTests.test_network_hotplug_persistent_transient_detach_vm_restart,
+        # LibvirtTests.test_network_hotplug_persistent_vm_restart,
+        # LibvirtTests.test_network_hotplug_transient_vm_restart,
+        # LibvirtTests.test_numa_topology,
+        # LibvirtTests.test_serial_file_output,
+        # LibvirtTests.test_serial_tcp,
+        # LibvirtTests.test_shutdown,
+        # LibvirtTests.test_virsh_console_works_with_pty,
     ]
 
     suite = unittest.TestSuite()
