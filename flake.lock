@@ -10,11 +10,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1770972839,
-        "narHash": "sha256-fQlh8lcvBxxfYZJZvgsVbEqzHJSULkPgREyZ0wQZ2AQ=",
+        "lastModified": 1770989976,
+        "narHash": "sha256-Mg9vCGUMEkJSX9f6Qr7isEv/3Zu2f4GqFTRoZBsYOgM=",
         "owner": "amphi",
         "repo": "cloud-hypervisor",
-        "rev": "4bc8d1a3c220360db217cfccec0500a97b1d82e5",
+        "rev": "a0fea5be0b12db5c7dbf1cd61fb62caa498349e3",
         "type": "github"
       },
       "original": {
@@ -209,19 +209,20 @@
         ]
       },
       "locked": {
-        "lastModified": 1770986501,
-        "narHash": "sha256-HRRC5X3bgJYndhnPLswMK1rJjch6M/rxcpA/iL6ZQ+k=",
-        "ref": "refs/heads/basti_debug",
-        "rev": "3063bb6c278c77fd042649e602e5e73574ca6e59",
-        "revCount": 53634,
+        "lastModified": 1771367744,
+        "narHash": "sha256-fLa4pFJVDhiCI17x3rKSP1OSMZySeV8tdTajCRbxSp4=",
+        "ref": "handle_network_failure",
+        "rev": "90c9364dd9d74d1bc6d236a00dd21cefdf1d0d43",
+        "revCount": 53625,
         "submodules": true,
         "type": "git",
-        "url": "file:/home/gonzo/libvirt"
+        "url": "https://github.com/tpressure/libvirt"
       },
       "original": {
+        "ref": "handle_network_failure",
         "submodules": true,
         "type": "git",
-        "url": "file:/home/gonzo/libvirt"
+        "url": "https://github.com/tpressure/libvirt"
       }
     },
     "libvirt-tests": {
