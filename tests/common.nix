@@ -631,6 +631,7 @@ in
             argument = "${pkgs.writeText "cirros-numa.xml" (virsh_ch_xml {
               numa = true;
               hugepages = true;
+              prefault = true;
             })}";
           };
         };

@@ -62,6 +62,12 @@ let
             ''
         }
         </numatune>
+        <memoryBacking>
+          <hugepages>
+            <page size="2" unit="M" nodeset="0"/>
+          </hugepages>
+          <allocation mode="immediate"/>
+        </memoryBacking>
         <os>
           <type arch='x86_64'>hvm</type>
           <kernel>/etc/CLOUDHV.fd</kernel>
