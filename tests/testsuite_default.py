@@ -1383,7 +1383,6 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
         """
         controllerVM.succeed("virsh define /etc/domain-chv.xml")
         controllerVM.succeed("virsh start testvm")
-        breakpoint()
 
         wait_for_ssh(controllerVM)
 
