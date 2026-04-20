@@ -1376,6 +1376,30 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
         setup_nested_cirros(controllerVM)
         assert_nested_cirros_connectivity(controllerVM)
 
+    # def test_vsock(self):
+        # """
+        # Test that a Stopped Failed event is emitted in case the Cloud
+        # Hypervisor process crashes.
+        # """
+        # controllerVM.succeed("virsh define /etc/domain-chv.xml")
+        # controllerVM.succeed("virsh start testvm")
+
+        # wait_for_ssh(controllerVM)
+
+        # controllerVM.succeed(
+            # "screen -dmS socat sh -c 'socat - UNIX-LISTEN:/run/libvirt/ch/testvm-vsock_1234 > /tmp/vsock-msg'"
+        # )
+
+        # time.sleep(1)
+        # ssh(
+            # controllerVM,
+            # "\"echo test_guest | socat -u STDIN VSOCK-CONNECT:2:1234\"",
+        # )
+
+
+        # controllerVM.succeed('cat /tmp/vsock-msg | grep test_guest')
+        # breakpoint()
+
     def test_vsock(self):
         """
         Test that a Stopped Failed event is emitted in case the Cloud
@@ -1386,21 +1410,14 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
 
         wait_for_ssh(controllerVM)
 
-        controllerVM.succeed(
-            'screen -dmS socat socat - UNIX-LISTEN:/run/libvirt/ch/testvm-vsock_1234 > /tmp/vsock-msg'
+        ssh(controllerVM,
+            "screen -dmS qemu-ga /nix/store/p92jaqbnpgbg6jb3lw7flyqfd5p2xigj-qemu-host-cpu-only-10.1.5-ga/bin/qemu-ga -m vsock-listen -p 3:1234"
         )
-        # breakpoint()
 
         time.sleep(1)
-        # ssh(controllerVM, "\"socat -u EXEC:\"printf '%s\n' 'test_guest'\" VSOCK-CONNECT:2:1234\"")
-        ssh(
-            controllerVM,
-            r"""sh -c 'printf "%s\n" "test_guest" | socat -u STDIN VSOCK-CONNECT:2:1234'"""
+        controllerVM.succeed(
+            "virsh qemu-agent-command testvm '{\"execute\": \"guest-info\"}'"
         )
-
-
-        controllerVM.succeed('cat /tmp/vsock-msg | grep test_guest')
-
 
 
 def suite():

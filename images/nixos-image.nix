@@ -105,6 +105,8 @@ nixpkgs.lib.nixosSystem {
         networking.networkmanager.enable = lib.mkForce false;
         networking.useNetworkd = true;
 
+        services.qemuGuest.enable = true;  
+
         systemd.network = {
           enable = true;
           networks = {
