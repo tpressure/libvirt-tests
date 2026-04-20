@@ -267,6 +267,9 @@ let
                 ""
             }
           </disk>
+          <vsock model='virtio'>
+            <cid auto='no' address='3'/>
+          </vsock>
           ${
             if !(builtins.isNull cloudInit) then
               ''
