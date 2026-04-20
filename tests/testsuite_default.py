@@ -1389,10 +1389,14 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
         controllerVM.succeed(
             'screen -dmS socat socat - UNIX-LISTEN:/run/libvirt/ch/testvm-vsock_1234 > /tmp/vsock-msg'
         )
-        breakpoint()
+        # breakpoint()
 
         time.sleep(1)
-        ssh(controllerVM, "\"socat -u EXEC:\"printf '%s\n' 'test_guest'\" VSOCK-CONNECT:2:1234\"")
+        # ssh(controllerVM, "\"socat -u EXEC:\"printf '%s\n' 'test_guest'\" VSOCK-CONNECT:2:1234\"")
+        ssh(
+            controllerVM,
+            r"""sh -c 'printf "%s\n" "test_guest" | socat -u STDIN VSOCK-CONNECT:2:1234'"""
+        )
 
 
         controllerVM.succeed('cat /tmp/vsock-msg | grep test_guest')
