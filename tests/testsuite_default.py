@@ -1416,8 +1416,10 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
 
         time.sleep(1)
         controllerVM.succeed(
-            "virsh qemu-agent-command testvm '{\"execute\": \"guest-info\"}'"
+            # "virsh qemu-agent-command testvm '{\"execute\": \"guest-info\"}'"
+            "virsh qemu-agent-command testvm '{\"execute\":\"guest-exec\", \"arguments\": {\"path\": \"/run/current-system/sw/bin/touch\", \"arg\": [\"/tmp/abcd\"], \"capture-output\": true } }'"
         )
+        breakpoint()
 
 
 def suite():
