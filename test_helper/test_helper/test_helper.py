@@ -49,6 +49,7 @@ class LibvirtTestsBase(unittest.TestCase):
         print(f"\n\nRunning test: {self._testMethodName}\n\n")
 
     def tearDown(self):
+        breakpoint()
         if self.controllerVM:
             teardownTestControllerVM(self.controllerVM, self)
 

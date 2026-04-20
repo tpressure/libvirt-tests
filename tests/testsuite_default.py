@@ -1390,7 +1390,7 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
             'screen -dmS socat socat - UNIX-LISTEN:/run/libvirt/ch/testvm-vsock_1234 > /tmp/vsock-msg'
         )
 
-        time.sleep(1)
+        time.sleep(3)
 
         ssh(controllerVM, 'echo -e "test_guest" | socat - VSOCK-CONNECT:2:1234')
 
