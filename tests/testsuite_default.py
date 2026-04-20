@@ -1392,7 +1392,7 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
         breakpoint()
 
         time.sleep(1)
-        ssh(controllerVM, "socat -u EXEC:\"printf '%s\n' 'test_guest'\" VSOCK-CONNECT:2:1234")
+        ssh(controllerVM, "\"socat -u EXEC:\"printf '%s\n' 'test_guest'\" VSOCK-CONNECT:2:1234\"")
 
 
         controllerVM.succeed('cat /tmp/vsock-msg | grep test_guest')
