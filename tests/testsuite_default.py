@@ -1389,6 +1389,7 @@ class LibvirtTests(LibvirtTestsBase):  # type: ignore
         controllerVM.succeed(
             'screen -dmS socat socat - UNIX-LISTEN:/run/libvirt/ch/testvm-vsock_1234 > /tmp/vsock-msg'
         )
+        breakpoint()
 
         time.sleep(3)
 
